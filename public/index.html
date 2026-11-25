@@ -1,4 +1,144 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#fff7e9"><title>Mis juegos</title><style>*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:#fff7e9;color:#344054;touch-action:manipulation}header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px}h1{font-size:clamp(22px,4vw,36px);margin:0}button{border:0;border-radius:20px;background:#fff;box-shadow:0 3px 0 #e7ddcc;padding:12px 20px;font-size:clamp(18px,3vw,25px);font-weight:700;color:#344054;cursor:pointer;touch-action:manipulation}button:active{transform:translateY(2px)}.selected{outline:5px solid #5b96d9}.toolbar{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;padding:8px}.stage{width:min(92vw,780px);margin:8px auto;position:relative;aspect-ratio:4/3;background:white;border-radius:25px;overflow:hidden;box-shadow:0 8px 24px #d5c9b477}canvas{display:block;width:100%;height:100%;touch-action:none}.bottom{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;padding:12px}.color{width:56px;height:56px;border-radius:50%;padding:0;border:5px solid white;box-shadow:0 2px 6px #999}.color.selected{outline:4px solid #344054}.piece{position:absolute;touch-action:none;user-select:none;cursor:grab;box-shadow:0 2px 8px #7779;border:2px solid white;border-radius:8px}.target{position:absolute;border:3px dashed #b4c3d1;border-radius:8px;background:#e7f0f6aa}.message{text-align:center;font-size:23px;font-weight:700;padding:6px}#puzzle{position:absolute;inset:0;display:none}#puzzle .piece{background-repeat:no-repeat}#home{display:none}#home button{font-size:35px;padding:20px}#celebrate{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#fff9;font-size:70px;z-index:20;pointer-events:none}@media(max-height:650px){header{padding:5px 15px}.toolbar{padding:2px}.stage{width:min(74vw,680px);max-height:67vh;aspect-ratio:4/3}.bottom{padding:5px}.color{width:43px;height:43px}button{padding:7px 13px}}
-</style></head><body><header><button id="homeBtn" aria-label="Elegir dibujo">⌂ Dibujos</button><h1>🎨 Pinto y juego</h1><button id="reset">↻ Empezar</button></header><div class="toolbar" id="choices"><button data-shape="cat">🐱 Gato</button><button data-shape="fish">🐟 Pez</button><button data-shape="flower">🌼 Flor</button></div><div class="message" id="message">¡Pinta con el dedo!</div><div class="stage" id="stage"><canvas id="canvas" width="800" height="600"></canvas><div id="puzzle"></div><div id="celebrate">🎉 ⭐ 🎉</div></div><div class="bottom" id="bottom"><button class="color selected" data-color="#f4a261" style="background:#f4a261" aria-label="Naranja"></button><button class="color" data-color="#ec6aa7" style="background:#ec6aa7" aria-label="Rosa"></button><button class="color" data-color="#74c69d" style="background:#74c69d" aria-label="Verde"></button><button class="color" data-color="#80bfff" style="background:#80bfff" aria-label="Azul"></button><button class="color" data-color="#bd93f9" style="background:#bd93f9" aria-label="Violeta"></button><button id="done">🧩 ¡Puzle!</button></div><script>
-(function(){'use strict';var canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d'),puzzle=document.getElementById('puzzle'),stage=document.getElementById('stage'),message=document.getElementById('message'),bottom=document.getElementById('bottom');var shape='cat',color='#f4a261',drawing=false,strokes=0,mode='paint',solved=0;var W=800,H=600;function path(c,s){c.beginPath();if(s==='cat'){c.moveTo(225,205);c.lineTo(210,95);c.lineTo(330,160);c.quadraticCurveTo(400,140,470,160);c.lineTo(590,95);c.lineTo(575,205);c.bezierCurveTo(690,300,630,480,400,495);c.bezierCurveTo(170,480,110,300,225,205);c.closePath()}else if(s==='fish'){c.moveTo(205,300);c.bezierCurveTo(300,125,565,160,625,300);c.bezierCurveTo(565,440,300,475,205,300);c.lineTo(85,180);c.lineTo(85,420);c.closePath()}else{for(var i=0;i<8;i++){var a=i*Math.PI/4;var x=400+140*Math.cos(a),y=290+140*Math.sin(a);c.moveTo(x+65,y);c.arc(x,y,65,0,Math.PI*2)}c.moveTo(400,330);c.lineTo(400,525);c.lineWidth=35;c.strokeStyle='#79ba80';c.stroke();c.beginPath();c.arc(400,290,85,0,Math.PI*2)}}function outline(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);ctx.save();path(ctx,shape);ctx.fillStyle='#fff9e7';ctx.fill();ctx.lineWidth=12;ctx.strokeStyle='#49576b';ctx.stroke();ctx.restore();details()}function details(){ctx.save();ctx.fillStyle='#49576b';if(shape==='cat'){ctx.beginPath();ctx.arc(330,300,12,0,7);ctx.arc(470,300,12,0,7);ctx.fill();ctx.beginPath();ctx.moveTo(385,350);ctx.lineTo(415,350);ctx.lineTo(400,365);ctx.closePath();ctx.fill()}else if(shape==='fish'){ctx.beginPath();ctx.arc(510,280,13,0,7);ctx.fill()}else{ctx.beginPath();ctx.arc(400,290,52,0,7);ctx.fillStyle='#ffdc68';ctx.fill()}ctx.restore()}function point(e){var r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height}}function dab(e){if(mode!=='paint')return;var p=point(e);ctx.save();path(ctx,shape);ctx.clip();ctx.globalAlpha=0.10;ctx.globalCompositeOperation='source-over';ctx.fillStyle=color;ctx.beginPath();ctx.arc(p.x,p.y,55,0,Math.PI*2);ctx.fill();ctx.restore();details();strokes++}canvas.addEventListener('pointerdown',function(e){drawing=true;try{canvas.setPointerCapture(e.pointerId)}catch(_){}dab(e)});canvas.addEventListener('pointermove',function(e){if(drawing)dab(e)});['pointerup','pointercancel'].forEach(function(x){canvas.addEventListener(x,function(){drawing=false})});function select(s){shape=s;mode='paint';strokes=0;puzzle.style.display='none';puzzle.innerHTML='';canvas.style.visibility='visible';bottom.style.display='flex';message.textContent='¡Pinta con el dedo!';outline();document.querySelectorAll('[data-shape]').forEach(function(b){b.classList.toggle('selected',b.dataset.shape===s)})}document.querySelectorAll('[data-shape]').forEach(function(b){b.onclick=function(){select(b.dataset.shape)}});document.querySelectorAll('[data-color]').forEach(function(b){b.onclick=function(){color=b.dataset.color;document.querySelectorAll('[data-color]').forEach(function(v){v.classList.remove('selected')});b.classList.add('selected')}});document.getElementById('reset').onclick=function(){select(shape)};document.getElementById('homeBtn').onclick=function(){select('cat')};function startPuzzle(){if(mode==='puzzle')return;mode='puzzle';solved=0;var url=canvas.toDataURL('image/png');canvas.style.visibility='hidden';bottom.style.display='none';puzzle.style.display='block';puzzle.innerHTML='';message.textContent='¡Pon cada pieza en su sitio!';var positions=[[.19,.11],[.51,.11],[.19,.45],[.51,.45]],size=.30;var order=[2,0,3,1];for(var i=0;i<4;i++){(function(i){var target=document.createElement('div');target.className='target';target.style.left=(positions[i][0]*100)+'%';target.style.top=(positions[i][1]*100)+'%';target.style.width=(size*100)+'%';target.style.height=(size*100)+'%';puzzle.appendChild(target);var piece=document.createElement('div');piece.className='piece';piece.style.width=(size*100)+'%';piece.style.height=(size*100)+'%';piece.style.backgroundImage='url('+url+')';piece.style.backgroundSize=(100/size)+'% '+(100/size)+'%';piece.style.backgroundPosition=(i%2?'-100%':'0%')+' '+(i>=2?'-100%':'0%');/* source quadrants */piece.style.backgroundSize='200% 200%';piece.style.left=(positions[order[i]][0]*100)+'%';piece.style.top=(positions[order[i]][1]*100)+'%';piece.dataset.index=i;puzzle.appendChild(piece);var sx,sy,ox,oy,drag=false;piece.addEventListener('pointerdown',function(e){if(piece.dataset.locked)return;drag=true;sx=e.clientX;sy=e.clientY;ox=parseFloat(piece.style.left);oy=parseFloat(piece.style.top);piece.style.zIndex=10;piece.setPointerCapture(e.pointerId)});piece.addEventListener('pointermove',function(e){if(!drag)return;var r=puzzle.getBoundingClientRect();piece.style.left=Math.max(0,Math.min(70,ox+(e.clientX-sx)/r.width*100))+'%';piece.style.top=Math.max(0,Math.min(70,oy+(e.clientY-sy)/r.height*100))+'%'});piece.addEventListener('pointerup',function(){if(!drag)return;drag=false;var x=parseFloat(piece.style.left),y=parseFloat(piece.style.top),tx=positions[i][0]*100,ty=positions[i][1]*100;if(Math.abs(x-tx)<13&&Math.abs(y-ty)<13){piece.style.left=tx+'%';piece.style.top=ty+'%';piece.style.zIndex=1;piece.dataset.locked='yes';solved++;if(solved===4){message.textContent='¡Muy bien! 🎉';document.getElementById('celebrate').style.display='flex';setTimeout(function(){document.getElementById('celebrate').style.display='none';select(shape)},1800)}}else{piece.style.zIndex=1}})})(i)}}document.getElementById('done').onclick=startPuzzle;select('cat');})();
-</script></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#fff7e9">
+<title>Mis juegos</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,sans-serif;background:#fff7e9;color:#344054;touch-action:manipulation}
+button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulation}
+.screen{display:none;min-height:100vh}.screen.active{display:block}
+.home{width:min(100%,1040px);margin:auto;padding:24px}
+.home-head{text-align:center;padding:12px 0 22px}
+.home-head h1{font-size:clamp(30px,6vw,48px);margin:0 0 8px}
+.home-head p{font-size:clamp(18px,3vw,23px);margin:0;color:#687386}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:16px}
+.card{display:flex;min-height:158px;flex-direction:column;align-items:center;justify-content:center;gap:8px;border-radius:24px;background:#fff;box-shadow:0 5px 0 #e7ddcc,0 9px 22px #d5c9b455;padding:16px;transition:transform .12s,box-shadow .12s}
+.card:active{transform:translateY(3px);box-shadow:0 2px 0 #e7ddcc}
+.card .icon{font-size:clamp(52px,9vw,72px);line-height:1}
+.card .label{font-size:21px;font-weight:750}
+.paint{width:min(100%,900px);margin:auto;padding:12px 18px 22px}
+.paint-head{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px}
+.paint-head h1{font-size:clamp(22px,4vw,34px);margin:0;text-align:center;white-space:nowrap}
+.action{border-radius:20px;background:#fff;box-shadow:0 3px 0 #e7ddcc;padding:10px 16px;font-size:clamp(16px,2.8vw,21px);font-weight:700}
+.action:last-child{justify-self:end}
+.message{text-align:center;font-size:22px;font-weight:700;padding:12px 4px}
+.stage{width:min(92vw,780px);margin:0 auto;position:relative;aspect-ratio:4/3;background:white;border-radius:25px;overflow:hidden;box-shadow:0 8px 24px #d5c9b477}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+.bottom{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;padding:14px 0}
+.color{width:52px;height:52px;border-radius:50%;padding:0;border:5px solid white;box-shadow:0 2px 6px #999}
+.color.selected{outline:4px solid #344054}
+#done{border-radius:20px;background:#fff;box-shadow:0 3px 0 #e7ddcc;padding:10px 17px;font-size:19px;font-weight:700}
+#puzzle{position:absolute;inset:0;display:none}
+.piece{position:absolute;touch-action:none;user-select:none;cursor:grab;box-shadow:0 2px 8px #7779;border:2px solid white;border-radius:8px;background-repeat:no-repeat}
+.target{position:absolute;border:3px dashed #b4c3d1;border-radius:8px;background:#e7f0f6aa}
+#celebrate{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#fff9;font-size:70px;z-index:20;pointer-events:none}
+@media(max-width:520px){.home{padding:16px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card{min-height:138px}.paint{padding:8px}.paint-head{gap:5px}.action{padding:9px 10px}.color{width:45px;height:45px}}
+@media(max-height:650px){.home{padding:10px}.home-head{padding:0 0 10px}.home-head h1{font-size:30px}.card{min-height:110px}.card .icon{font-size:48px}.paint{padding:4px 10px}.message{padding:4px}.stage{width:min(74vw,680px);max-height:67vh}.color{width:42px;height:42px}}
+</style>
+</head>
+<body>
+<main id="homeScreen" class="screen active">
+  <div class="home">
+    <header class="home-head"><h1>🎨 ¿Qué quieres pintar?</h1><p>Elige un dibujo para empezar</p></header>
+    <div class="grid">
+      <button class="card" data-shape="cat"><span class="icon">🐱</span><span class="label">Gato</span></button>
+      <button class="card" data-shape="fish"><span class="icon">🐟</span><span class="label">Pez</span></button>
+      <button class="card" data-shape="flower"><span class="icon">🌼</span><span class="label">Flor</span></button>
+      <button class="card" data-shape="dog"><span class="icon">🐶</span><span class="label">Perro</span></button>
+      <button class="card" data-shape="robot"><span class="icon">🤖</span><span class="label">Robot</span></button>
+      <button class="card" data-shape="tree"><span class="icon">🌳</span><span class="label">Árbol</span></button>
+      <button class="card" data-shape="car"><span class="icon">🚗</span><span class="label">Coche</span></button>
+    </div>
+  </div>
+</main>
+<section id="paintScreen" class="screen">
+  <div class="paint">
+    <header class="paint-head"><button class="action" id="homeBtn">‹ Dibujos</button><h1>🎨 Pinto y juego</h1><button class="action" id="reset">↻ Borrar</button></header>
+    <div class="message" id="message">¡Pinta con el dedo!</div>
+    <div class="stage" id="stage"><canvas id="canvas" width="800" height="600"></canvas><div id="puzzle"></div><div id="celebrate">🎉 ⭐ 🎉</div></div>
+    <div class="bottom" id="bottom">
+      <button class="color selected" data-color="#f4a261" style="background:#f4a261" aria-label="Naranja"></button>
+      <button class="color" data-color="#ec6aa7" style="background:#ec6aa7" aria-label="Magenta"></button>
+      <button class="color" data-color="#74c69d" style="background:#74c69d" aria-label="Verde"></button>
+      <button class="color" data-color="#80bfff" style="background:#80bfff" aria-label="Azul"></button>
+      <button class="color" data-color="#bd93f9" style="background:#bd93f9" aria-label="Lila"></button>
+      <button class="color" data-color="#f8c4d4" style="background:#f8c4d4" aria-label="Rosa pálido"></button>
+      <button id="done">🧩 ¡Puzle!</button>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+'use strict';
+var canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d'),puzzle=document.getElementById('puzzle'),message=document.getElementById('message'),bottom=document.getElementById('bottom'),homeScreen=document.getElementById('homeScreen'),paintScreen=document.getElementById('paintScreen');
+var shape='cat',color='#f4a261',drawing=false,mode='paint',solved=0,W=800,H=600;
+function path(c,s){
+  c.beginPath();
+  if(s==='cat'){
+    c.moveTo(225,205);c.lineTo(210,95);c.lineTo(330,160);c.quadraticCurveTo(400,140,470,160);c.lineTo(590,95);c.lineTo(575,205);c.bezierCurveTo(690,300,630,480,400,495);c.bezierCurveTo(170,480,110,300,225,205);c.closePath();
+  }else if(s==='fish'){
+    c.moveTo(205,300);c.bezierCurveTo(300,125,565,160,625,300);c.bezierCurveTo(565,440,300,475,205,300);c.lineTo(85,180);c.lineTo(85,420);c.closePath();
+  }else if(s==='flower'){
+    for(var i=0;i<8;i++){var a=i*Math.PI/4,x=400+140*Math.cos(a),y=275+140*Math.sin(a);c.moveTo(x+62,y);c.arc(x,y,62,0,Math.PI*2);}
+  }else if(s==='dog'){
+    c.moveTo(260,190);c.bezierCurveTo(185,95,130,140,168,285);c.bezierCurveTo(115,360,200,490,400,490);c.bezierCurveTo(600,490,685,360,632,285);c.bezierCurveTo(670,140,615,95,540,190);c.bezierCurveTo(455,145,345,145,260,190);c.closePath();
+  }else if(s==='robot'){
+    c.moveTo(340,120);c.lineTo(460,120);c.lineTo(460,165);c.lineTo(520,165);c.quadraticCurveTo(550,165,550,195);c.lineTo(550,335);c.quadraticCurveTo(550,365,520,365);c.lineTo(475,365);c.lineTo(475,455);c.lineTo(435,455);c.lineTo(435,390);c.lineTo(365,390);c.lineTo(365,455);c.lineTo(325,455);c.lineTo(325,365);c.lineTo(280,365);c.quadraticCurveTo(250,365,250,335);c.lineTo(250,195);c.quadraticCurveTo(250,165,280,165);c.lineTo(340,165);c.closePath();
+  }else if(s==='tree'){
+    c.moveTo(350,470);c.lineTo(350,390);c.lineTo(260,390);c.lineTo(315,315);c.lineTo(250,315);c.lineTo(325,220);c.lineTo(285,220);c.lineTo(400,100);c.lineTo(515,220);c.lineTo(475,220);c.lineTo(550,315);c.lineTo(485,315);c.lineTo(540,390);c.lineTo(450,390);c.lineTo(450,470);c.closePath();
+  }else if(s==='car'){
+    c.moveTo(120,390);c.lineTo(145,320);c.quadraticCurveTo(155,295,185,290);c.lineTo(260,270);c.lineTo(320,190);c.quadraticCurveTo(335,170,360,170);c.lineTo(510,170);c.quadraticCurveTo(535,170,550,195);c.lineTo(610,290);c.quadraticCurveTo(665,300,675,340);c.lineTo(680,390);c.lineTo(650,410);c.lineTo(150,410);c.closePath();
+  }
+}
+function outline(){
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);ctx.save();path(ctx,shape);ctx.fillStyle='#fff9e7';ctx.fill();ctx.lineWidth=12;ctx.lineJoin='round';ctx.strokeStyle='#49576b';ctx.stroke();ctx.restore();details();
+}
+function details(){
+  ctx.save();ctx.fillStyle='#49576b';ctx.strokeStyle='#49576b';ctx.lineWidth=10;ctx.lineCap='round';
+  if(shape==='cat'){
+    ctx.beginPath();ctx.arc(330,300,12,0,Math.PI*2);ctx.arc(470,300,12,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.moveTo(385,350);ctx.lineTo(415,350);ctx.lineTo(400,365);ctx.closePath();ctx.fill();
+  }else if(shape==='fish'){
+    ctx.beginPath();ctx.arc(510,280,13,0,Math.PI*2);ctx.fill();
+  }else if(shape==='flower'){
+    ctx.beginPath();ctx.moveTo(400,340);ctx.lineTo(400,520);ctx.stroke();ctx.beginPath();ctx.ellipse(365,430,42,18,-.5,0,Math.PI*2);ctx.ellipse(435,465,42,18,.5,0,Math.PI*2);ctx.fillStyle='#74c69d';ctx.fill();ctx.beginPath();ctx.arc(400,275,48,0,Math.PI*2);ctx.fillStyle='#ffdc68';ctx.fill();
+  }else if(shape==='dog'){
+    ctx.beginPath();ctx.arc(330,300,12,0,Math.PI*2);ctx.arc(470,300,12,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(400,350,27,19,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.moveTo(400,369);ctx.quadraticCurveTo(400,395,378,395);ctx.moveTo(400,369);ctx.quadraticCurveTo(400,395,422,395);ctx.stroke();
+  }else if(shape==='robot'){
+    ctx.beginPath();ctx.moveTo(400,120);ctx.lineTo(400,82);ctx.stroke();ctx.beginPath();ctx.arc(400,68,13,0,Math.PI*2);ctx.fill();ctx.fillRect(325,220,35,35);ctx.fillRect(440,220,35,35);ctx.beginPath();ctx.moveTo(350,300);ctx.lineTo(450,300);ctx.stroke();
+  }else if(shape==='tree'){
+    ctx.beginPath();ctx.moveTo(400,150);ctx.lineTo(400,255);ctx.stroke();
+  }else if(shape==='car'){
+    ctx.beginPath();ctx.moveTo(285,270);ctx.lineTo(330,205);ctx.lineTo(500,205);ctx.lineTo(545,270);ctx.closePath();ctx.fillStyle='#d9efff';ctx.fill();ctx.stroke();ctx.fillStyle='#49576b';ctx.beginPath();ctx.arc(245,405,42,0,Math.PI*2);ctx.arc(555,405,42,0,Math.PI*2);ctx.fill();ctx.fillStyle='#dce4ed';ctx.beginPath();ctx.arc(245,405,17,0,Math.PI*2);ctx.arc(555,405,17,0,Math.PI*2);ctx.fill();
+  }
+  ctx.restore();
+}
+function point(e){var r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
+function dab(e){if(mode!=='paint')return;var p=point(e);ctx.save();path(ctx,shape);ctx.clip();ctx.globalAlpha=.05;ctx.globalCompositeOperation='source-over';ctx.fillStyle=color;ctx.beginPath();ctx.arc(p.x,p.y,55,0,Math.PI*2);ctx.fill();ctx.restore();details();}
+function select(s){
+  shape=s;mode='paint';puzzle.style.display='none';puzzle.innerHTML='';canvas.style.visibility='visible';bottom.style.display='flex';message.textContent='¡Pinta con el dedo!';homeScreen.classList.remove('active');paintScreen.classList.add('active');outline();
+}
+function goHome(){drawing=false;mode='paint';paintScreen.classList.remove('active');homeScreen.classList.add('active');}
+canvas.addEventListener('pointerdown',function(e){drawing=true;try{canvas.setPointerCapture(e.pointerId);}catch(_){}dab(e);});
+canvas.addEventListener('pointermove',function(e){if(drawing)dab(e);});
+['pointerup','pointercancel','lostpointercapture'].forEach(function(x){canvas.addEventListener(x,function(){drawing=false;});});
+document.querySelectorAll('.card').forEach(function(b){b.addEventListener('click',function(){select(b.dataset.shape);});});
+document.querySelectorAll('[data-color]').forEach(function(b){b.addEventListener('click',function(){color=b.dataset.color;document.querySelectorAll('[data-color]').forEach(function(v){v.classList.remove('selected');});b.classList.add('selected');});});
+document.getElementById('reset').addEventListener('click',function(){outline();});
+document.getElementById('homeBtn').addEventListener('click',goHome);
+function startPuzzle(){
+  if(mode==='puzzle')return;mode='puzzle';var url=canvas.toDataURL('image/png');canvas.style.visibility='hidden';bottom.style.display='none';puzzle.style.display='block';puzzle.innerHTML='';message.textContent='¡Pon cada pieza en su sitio!';
+  var positions=[[.19,.11],[.51,.11],[.19,.45],[.51,.45]],size=.30,order=[2,0,3,1];solved=0;
+  for(var i=0;i<4;i++){(function(i){
+    var target=document.createElement('div');target.className='target';target.style.left=(positions[i][0]*100)+'%';target.style.top=(positions[i][1]*100)+'%';target.style.width=(size*100)+'%';target.style.height=(size*100)+'%';puzzle.appendChild(target);
+    var piece=document.createElement('div');piece.className='piece';piece.style.width=(size*100)+'%';piece.style.height=(size*100)+'%';piece.style.backgroundImage='url('+url+')';piece.style.backgroundSize='200% 200%';piece.style.backgroundPosition=(i%2?'-100%':'0%')+' '+(i>=2?'-100%':'0%');piece.style.left=(positions[order[i]][0]*100)+'%';piece.style.top=(positions[order[i]][1]*100)+'%';puzzle.appendChild(piece);
+    var sx,sy,ox,oy,drag=false;piece.addEventListener('pointerdown',function(e){if(piece.dataset.locked)return;drag=true;sx=e.clientX;sy=e.clientY;ox=parseFloat(piece.style.left);oy=parseFloat(piece.style.top);piece.style.zIndex=10;piece.setPointerCapture(e.pointerId);});
+    piece.addEventListener('pointermove',function(e){if(!drag)return;var r=puzzle.getBoundingClientRect();piece.style.left=Math.max(0,Math.min(70,ox+(e.clientX-sx)/r.width*100))+'%';piece.style.top=Math.max(0,Math.min(70,oy+(e.clientY-sy)/r.height*100))+'%';});
+    piece.addEventListener('pointerup',function(){if(!drag)return;drag=false;var x=parseFloat(piece.style.left),y=parseFloat(piece.style.top),tx=positions[i][0]*100,ty=positions[i][1]*100;if(Math.abs(x-tx)<13&&Math.abs(y-ty)<13){piece.style.left=tx+'%';piece.style.top=ty+'%';piece.style.zIndex=1;piece.dataset.locked='yes';solved++;if(solved===4){message.textContent='¡Muy bien! 🎉';document.getElementById('celebrate').style.display='flex';setTimeout(function(){document.getElementById('celebrate').style.display='none';select(shape);},1800);}}else piece.style.zIndex=1;});
+  })(i);}
+}
+document.getElementById('done').addEventListener('click',startPuzzle);
+})();
