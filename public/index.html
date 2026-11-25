@@ -32,9 +32,16 @@ canvas{display:block;width:100%;height:100%;touch-action:none}
 .color{width:52px;height:52px;border-radius:50%;padding:0;border:5px solid white;box-shadow:0 2px 6px #999}
 .color.selected{outline:4px solid #344054}
 #done{border-radius:20px;background:#fff;box-shadow:0 3px 0 #e7ddcc;padding:10px 17px;font-size:19px;font-weight:700}
-#puzzle{position:absolute;inset:0;display:none}
-.piece{position:absolute;touch-action:none;user-select:none;cursor:grab;box-shadow:0 2px 8px #7779;border:2px solid white;border-radius:8px;background-repeat:no-repeat}
-.target{position:absolute;border:3px dashed #b4c3d1;border-radius:8px;background:#e7f0f6aa}
+#puzzle{position:absolute;inset:0;display:none;flex-direction:column;gap:8px;padding:3%}
+.puzzle-board{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:8px;width:min(94%,560px);flex:1;min-height:0;margin:0 auto}
+.target{position:relative;min-width:0;min-height:0;border:3px dashed #b4c3d1;border-radius:14px;background:#eef4f8;box-shadow:inset 0 1px 5px #8796a622}
+.puzzle-tray{display:flex;justify-content:center;align-items:center;gap:8px;min-height:27%;padding:4px}
+.puzzle-piece{position:relative;flex:0 1 24%;width:24%;max-width:138px;aspect-ratio:4/3;padding:3px;border:3px solid white;border-radius:12px;background:#fff;box-shadow:0 3px 9px #34405455;touch-action:none;user-select:none;cursor:grab;z-index:1}
+.puzzle-piece.dragging{z-index:15;box-shadow:0 8px 18px #34405466;cursor:grabbing}
+.puzzle-piece canvas{width:100%;height:100%;border-radius:7px;pointer-events:none}
+.target .puzzle-piece{position:absolute;inset:0;width:100%;height:100%;max-width:none;aspect-ratio:auto;padding:2px;cursor:default;z-index:2}
+@media(max-width:520px){#puzzle{gap:5px;padding:2%}.puzzle-board{gap:5px;width:98%}.target{border-width:2px;border-radius:9px}.puzzle-tray{gap:5px;min-height:25%;padding:2px}.puzzle-piece{flex-basis:24%;width:24%;padding:2px;border-radius:8px}}
+@media(max-height:500px){#puzzle{flex-direction:row;gap:10px}.puzzle-board{width:62%;height:100%;flex:none}.puzzle-tray{width:35%;height:100%;flex-direction:column}.puzzle-piece{width:60%;flex:0 1 21%;max-width:130px;max-height:22%}}
 #celebrate{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#fff9;font-size:70px;z-index:20;pointer-events:none}
 @media(max-width:520px){.home{padding:16px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card{min-height:138px}.paint{padding:8px}.paint-head{gap:5px}.action{padding:9px 10px}.color{width:45px;height:45px}}
 @media(max-height:650px){.home{padding:10px}.home-head{padding:0 0 10px}.home-head h1{font-size:30px}.card{min-height:110px}.card .icon{font-size:48px}.paint{padding:4px 10px}.message{padding:4px}.stage{width:min(74vw,680px);max-height:67vh}.color{width:42px;height:42px}}
@@ -130,15 +137,38 @@ document.querySelectorAll('[data-color]').forEach(function(b){b.addEventListener
 document.getElementById('reset').addEventListener('click',function(){outline();});
 document.getElementById('homeBtn').addEventListener('click',goHome);
 function startPuzzle(){
-  if(mode==='puzzle')return;mode='puzzle';var url=canvas.toDataURL('image/png');canvas.style.visibility='hidden';bottom.style.display='none';puzzle.style.display='block';puzzle.innerHTML='';message.textContent='¡Pon cada pieza en su sitio!';
-  var positions=[[.19,.11],[.51,.11],[.19,.45],[.51,.45]],size=.30,order=[2,0,3,1];solved=0;
-  for(var i=0;i<4;i++){(function(i){
-    var target=document.createElement('div');target.className='target';target.style.left=(positions[i][0]*100)+'%';target.style.top=(positions[i][1]*100)+'%';target.style.width=(size*100)+'%';target.style.height=(size*100)+'%';puzzle.appendChild(target);
-    var piece=document.createElement('div');piece.className='piece';piece.style.width=(size*100)+'%';piece.style.height=(size*100)+'%';piece.style.backgroundImage='url('+url+')';piece.style.backgroundSize='200% 200%';piece.style.backgroundPosition=(i%2?'-100%':'0%')+' '+(i>=2?'-100%':'0%');piece.style.left=(positions[order[i]][0]*100)+'%';piece.style.top=(positions[order[i]][1]*100)+'%';puzzle.appendChild(piece);
-    var sx,sy,ox,oy,drag=false;piece.addEventListener('pointerdown',function(e){if(piece.dataset.locked)return;drag=true;sx=e.clientX;sy=e.clientY;ox=parseFloat(piece.style.left);oy=parseFloat(piece.style.top);piece.style.zIndex=10;piece.setPointerCapture(e.pointerId);});
-    piece.addEventListener('pointermove',function(e){if(!drag)return;var r=puzzle.getBoundingClientRect();piece.style.left=Math.max(0,Math.min(70,ox+(e.clientX-sx)/r.width*100))+'%';piece.style.top=Math.max(0,Math.min(70,oy+(e.clientY-sy)/r.height*100))+'%';});
-    piece.addEventListener('pointerup',function(){if(!drag)return;drag=false;var x=parseFloat(piece.style.left),y=parseFloat(piece.style.top),tx=positions[i][0]*100,ty=positions[i][1]*100;if(Math.abs(x-tx)<13&&Math.abs(y-ty)<13){piece.style.left=tx+'%';piece.style.top=ty+'%';piece.style.zIndex=1;piece.dataset.locked='yes';solved++;if(solved===4){message.textContent='¡Muy bien! 🎉';document.getElementById('celebrate').style.display='flex';setTimeout(function(){document.getElementById('celebrate').style.display='none';select(shape);},1800);}}else piece.style.zIndex=1;});
-  })(i);}
+  if(mode==='puzzle')return;
+  mode='puzzle';drawing=false;canvas.style.visibility='hidden';bottom.style.display='none';puzzle.style.display='flex';puzzle.innerHTML='';message.textContent='¡Arrastra cada tarjeta a su hueco!';
+  var board=document.createElement('div');board.className='puzzle-board';
+  var tray=document.createElement('div');tray.className='puzzle-tray';
+  var crop={x:40,y:30,w:720,h:540},pieceW=360,pieceH=270,positions=[[0,0],[1,0],[0,1],[1,1]],order=[2,0,3,1],slots=[];
+  for(var i=0;i<4;i++){
+    var slot=document.createElement('div');slot.className='target';slot.dataset.index=String(i);board.appendChild(slot);slots.push(slot);
+  }
+  order.forEach(function(index){
+    var piece=document.createElement('div');piece.className='puzzle-piece';piece.dataset.index=String(index);
+    var image=document.createElement('canvas');image.width=pieceW;image.height=pieceH;
+    var p=positions[index],sx=crop.x+p[0]*crop.w/2,sy=crop.y+p[1]*crop.h/2;
+    image.getContext('2d').drawImage(canvas,sx,sy,crop.w/2,crop.h/2,0,0,pieceW,pieceH);piece.appendChild(image);tray.appendChild(piece);
+    var sx0,sy0,drag=false;
+    piece.addEventListener('pointerdown',function(e){
+      if(piece.dataset.locked)return;drag=true;sx0=e.clientX;sy0=e.clientY;piece.classList.add('dragging');piece.setPointerCapture(e.pointerId);e.preventDefault();
+    });
+    piece.addEventListener('pointermove',function(e){
+      if(!drag)return;piece.style.transform='translate('+(e.clientX-sx0)+'px,'+(e.clientY-sy0)+'px)';
+    });
+    piece.addEventListener('pointerup',function(e){
+      if(!drag)return;drag=false;piece.classList.remove('dragging');piece.style.transform='';
+      var target=null;
+      for(var j=0;j<slots.length;j++){var r=slots[j].getBoundingClientRect();if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom){target=slots[j];break;}}
+      if(target&&target.dataset.index===piece.dataset.index){
+        target.appendChild(piece);piece.dataset.locked='yes';piece.setAttribute('aria-label','Pieza colocada');solved++;
+        if(solved===4){message.textContent='¡Muy bien! 🎉';document.getElementById('celebrate').style.display='flex';setTimeout(function(){document.getElementById('celebrate').style.display='none';select(shape);},1800);}
+      }
+    });
+    piece.addEventListener('pointercancel',function(){drag=false;piece.classList.remove('dragging');piece.style.transform='';});
+  });
+  solved=0;puzzle.appendChild(board);puzzle.appendChild(tray);
 }
 document.getElementById('done').addEventListener('click',startPuzzle);
 })();
