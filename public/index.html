@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#fff7e9">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<meta name="apple-mobile-web-app-title" content="Pequejuegos">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Mis juegos</title>
 <style>
 *{box-sizing:border-box}
@@ -207,6 +212,9 @@ function startPuzzle(){
 }
 document.getElementById('done').addEventListener('click',startPuzzle);
 })();
+</script>
+<script>
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 </script>
 </body>
 </html>
