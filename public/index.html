@@ -62,6 +62,11 @@ canvas{display:block;width:100%;height:100%;touch-action:none}
       <button class="card" data-shape="robot"><span class="icon">🤖</span><span class="label">Robot</span></button>
       <button class="card" data-shape="tree"><span class="icon">🌳</span><span class="label">Árbol</span></button>
       <button class="card" data-shape="car"><span class="icon">🚗</span><span class="label">Coche</span></button>
+      <button class="card" data-shape="sun"><span class="icon">☀️</span><span class="label">Sol</span></button>
+      <button class="card" data-shape="cloud"><span class="icon">☁️</span><span class="label">Nube</span></button>
+      <button class="card" data-shape="mountain"><span class="icon">⛰️</span><span class="label">Montaña</span></button>
+      <button class="card" data-shape="house"><span class="icon">🏠</span><span class="label">Casa</span></button>
+      <button class="card" data-shape="bus"><span class="icon">🚌</span><span class="label">Autobús</span></button>
     </div>
   </div>
 </main>
@@ -102,6 +107,16 @@ function path(c,s){
     c.moveTo(350,470);c.lineTo(350,390);c.lineTo(260,390);c.lineTo(315,315);c.lineTo(250,315);c.lineTo(325,220);c.lineTo(285,220);c.lineTo(400,100);c.lineTo(515,220);c.lineTo(475,220);c.lineTo(550,315);c.lineTo(485,315);c.lineTo(540,390);c.lineTo(450,390);c.lineTo(450,470);c.closePath();
   }else if(s==='car'){
     c.moveTo(120,390);c.lineTo(145,320);c.quadraticCurveTo(155,295,185,290);c.lineTo(260,270);c.lineTo(320,190);c.quadraticCurveTo(335,170,360,170);c.lineTo(510,170);c.quadraticCurveTo(535,170,550,195);c.lineTo(610,290);c.quadraticCurveTo(665,300,675,340);c.lineTo(680,390);c.lineTo(650,410);c.lineTo(150,410);c.closePath();
+  }else if(s==='sun'){
+    for(var j=0;j<32;j++){var a=-Math.PI/2+j*Math.PI/16,r=j%2===0?185:140,x=400+r*Math.cos(a),y=300+r*Math.sin(a);if(j===0)c.moveTo(x,y);else c.lineTo(x,y);}c.closePath();
+  }else if(s==='cloud'){
+    c.moveTo(205,420);c.bezierCurveTo(145,420,135,350,180,320);c.bezierCurveTo(175,265,250,235,310,275);c.bezierCurveTo(345,190,470,190,495,280);c.bezierCurveTo(560,250,625,290,610,350);c.bezierCurveTo(675,380,640,430,585,430);c.lineTo(205,430);c.closePath();
+  }else if(s==='mountain'){
+    c.moveTo(85,475);c.lineTo(275,205);c.lineTo(390,350);c.lineTo(520,125);c.lineTo(715,475);c.closePath();
+  }else if(s==='house'){
+    c.moveTo(220,470);c.lineTo(220,270);c.lineTo(175,270);c.lineTo(400,100);c.lineTo(625,270);c.lineTo(580,270);c.lineTo(580,470);c.closePath();
+  }else if(s==='bus'){
+    c.moveTo(180,170);c.lineTo(620,170);c.quadraticCurveTo(660,170,660,210);c.lineTo(660,410);c.quadraticCurveTo(660,450,620,450);c.lineTo(180,450);c.quadraticCurveTo(140,450,140,410);c.lineTo(140,210);c.quadraticCurveTo(140,170,180,170);c.closePath();
   }
 }
 function outline(){
@@ -123,6 +138,16 @@ function details(){
     ctx.beginPath();ctx.moveTo(400,150);ctx.lineTo(400,255);ctx.stroke();
   }else if(shape==='car'){
     ctx.beginPath();ctx.moveTo(285,270);ctx.lineTo(330,205);ctx.lineTo(500,205);ctx.lineTo(545,270);ctx.closePath();ctx.fillStyle='#d9efff';ctx.fill();ctx.stroke();ctx.fillStyle='#49576b';ctx.beginPath();ctx.arc(245,405,42,0,Math.PI*2);ctx.arc(555,405,42,0,Math.PI*2);ctx.fill();ctx.fillStyle='#dce4ed';ctx.beginPath();ctx.arc(245,405,17,0,Math.PI*2);ctx.arc(555,405,17,0,Math.PI*2);ctx.fill();
+  }else if(shape==='sun'){
+    ctx.fillStyle='#49576b';ctx.beginPath();ctx.arc(365,285,11,0,Math.PI*2);ctx.arc(435,285,11,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(400,300,55,.25,Math.PI-.25);ctx.stroke();
+  }else if(shape==='cloud'){
+    ctx.beginPath();ctx.arc(350,335,10,0,Math.PI*2);ctx.arc(455,335,10,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(402,350,35,.2,Math.PI-.2);ctx.stroke();
+  }else if(shape==='mountain'){
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.moveTo(232,266);ctx.lineTo(275,205);ctx.lineTo(318,260);ctx.lineTo(286,250);ctx.lineTo(270,271);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(470,211);ctx.lineTo(520,125);ctx.lineTo(579,232);ctx.lineTo(535,210);ctx.lineTo(510,235);ctx.closePath();ctx.fill();ctx.strokeStyle='#79ba80';ctx.lineWidth=18;ctx.beginPath();ctx.moveTo(95,470);ctx.lineTo(705,470);ctx.stroke();
+  }else if(shape==='house'){
+    ctx.beginPath();ctx.moveTo(330,470);ctx.lineTo(330,350);ctx.quadraticCurveTo(400,300,470,350);ctx.lineTo(470,470);ctx.closePath();ctx.fillStyle='#f2c078';ctx.fill();ctx.stroke();ctx.fillStyle='#d9efff';ctx.fillRect(255,310,70,70);ctx.strokeRect(255,310,70,70);ctx.fillRect(475,310,70,70);ctx.strokeRect(475,310,70,70);
+  }else if(shape==='bus'){
+    ctx.fillStyle='#d9efff';ctx.fillRect(180,205,100,115);ctx.fillRect(295,205,100,115);ctx.fillRect(410,205,100,115);ctx.fillRect(525,205,95,115);ctx.strokeRect(180,205,100,115);ctx.strokeRect(295,205,100,115);ctx.strokeRect(410,205,100,115);ctx.strokeRect(525,205,95,115);ctx.fillStyle='#49576b';ctx.fillRect(560,350,45,12);ctx.beginPath();ctx.arc(250,440,43,0,Math.PI*2);ctx.arc(550,440,43,0,Math.PI*2);ctx.fill();ctx.fillStyle='#dce4ed';ctx.beginPath();ctx.arc(250,440,18,0,Math.PI*2);ctx.arc(550,440,18,0,Math.PI*2);ctx.fill();
   }
   ctx.restore();
 }
