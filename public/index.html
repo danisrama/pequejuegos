@@ -152,7 +152,7 @@ function details(){
   ctx.restore();
 }
 function point(e){var r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
-function dab(e){if(mode!=='paint')return;var p=point(e);ctx.save();path(ctx,shape);ctx.clip();ctx.globalAlpha=.05;ctx.globalCompositeOperation='source-over';ctx.fillStyle=color;ctx.beginPath();ctx.arc(p.x,p.y,55,0,Math.PI*2);ctx.fill();ctx.restore();details();}
+function dab(e){if(mode!=='paint')return;var p=point(e);ctx.save();path(ctx,shape);ctx.clip();ctx.globalAlpha=.10;ctx.globalCompositeOperation='source-over';ctx.fillStyle=color;ctx.beginPath();ctx.arc(p.x,p.y,55,0,Math.PI*2);ctx.fill();ctx.restore();details();}
 function select(s){
   shape=s;mode='paint';document.getElementById('stage').classList.remove('puzzle-mode');puzzle.style.display='none';puzzle.innerHTML='';canvas.style.visibility='visible';bottom.style.display='flex';message.textContent='¡Pinta con el dedo!';homeScreen.classList.remove('active');paintScreen.classList.add('active');outline();
 }
