@@ -27,21 +27,24 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
 .action:last-child{justify-self:end}
 .message{text-align:center;font-size:22px;font-weight:700;padding:12px 4px}
 .stage{width:min(92vw,780px);margin:0 auto;position:relative;aspect-ratio:4/3;background:white;border-radius:25px;overflow:hidden;box-shadow:0 8px 24px #d5c9b477}
+.stage.puzzle-mode{width:min(92vw,600px);aspect-ratio:5/6}
+@media(max-height:650px){.stage.puzzle-mode{width:min(58vh,78vw);max-height:none}}
 canvas{display:block;width:100%;height:100%;touch-action:none}
 .bottom{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;padding:14px 0}
 .color{width:52px;height:52px;border-radius:50%;padding:0;border:5px solid white;box-shadow:0 2px 6px #999}
 .color.selected{outline:4px solid #344054}
 #done{border-radius:20px;background:#fff;box-shadow:0 3px 0 #e7ddcc;padding:10px 17px;font-size:19px;font-weight:700}
-#puzzle{position:absolute;inset:0;display:none;flex-direction:column;gap:8px;padding:3%}
-.puzzle-board{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:8px;width:min(94%,560px);flex:1;min-height:0;margin:0 auto}
-.target{position:relative;min-width:0;min-height:0;border:3px dashed #b4c3d1;border-radius:14px;background:#eef4f8;box-shadow:inset 0 1px 5px #8796a622}
-.puzzle-tray{display:flex;justify-content:center;align-items:center;gap:8px;min-height:27%;padding:4px}
-.puzzle-piece{position:relative;flex:0 1 24%;width:24%;max-width:138px;aspect-ratio:4/3;padding:3px;border:3px solid white;border-radius:12px;background:#fff;box-shadow:0 3px 9px #34405455;touch-action:none;user-select:none;cursor:grab;z-index:1}
+#puzzle{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:space-between;gap:2%;padding:3%}
+.puzzle-board{position:relative;isolation:isolate;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:1.5%;width:min(94%,560px);aspect-ratio:4/3;flex:none;margin:auto auto 0;overflow:hidden;border-radius:14px}
+.puzzle-board::before{content:"";position:absolute;z-index:0;inset:0;background-image:var(--puzzle-preview);background-size:100% 100%;background-position:center;filter:blur(3px);opacity:.55;pointer-events:none}
+.target{position:relative;z-index:1;min-width:0;min-height:0;border:3px dashed #b4c3d1;border-radius:14px;background:rgba(238,244,248,.38);box-shadow:inset 0 1px 5px #8796a622}
+.puzzle-tray{display:grid;grid-auto-flow:column;grid-auto-columns:50%;grid-template-rows:1fr;gap:1.5%;width:min(94%,560px);aspect-ratio:8/3;max-height:37.5%;flex:none;margin:0 auto auto;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:thin}
+.puzzle-piece{position:relative;width:100%;height:100%;padding:3px;border:3px solid white;border-radius:12px;background:#fff;box-shadow:0 3px 9px #34405455;touch-action:none;user-select:none;cursor:grab;z-index:1;scroll-snap-align:start}
 .puzzle-piece.dragging{z-index:15;box-shadow:0 8px 18px #34405466;cursor:grabbing}
 .puzzle-piece canvas{width:100%;height:100%;border-radius:7px;pointer-events:none}
-.target .puzzle-piece{position:absolute;inset:0;width:100%;height:100%;max-width:none;aspect-ratio:auto;padding:2px;cursor:default;z-index:2}
-@media(max-width:520px){#puzzle{gap:5px;padding:2%}.puzzle-board{gap:5px;width:98%}.target{border-width:2px;border-radius:9px}.puzzle-tray{gap:5px;min-height:25%;padding:2px}.puzzle-piece{flex-basis:24%;width:24%;padding:2px;border-radius:8px}}
-@media(max-height:500px){#puzzle{flex-direction:row;gap:10px}.puzzle-board{width:62%;height:100%;flex:none}.puzzle-tray{width:35%;height:100%;flex-direction:column}.puzzle-piece{width:60%;flex:0 1 21%;max-width:130px;max-height:22%}}
+.target .puzzle-piece{position:absolute;inset:0;width:100%;height:100%;max-width:none;padding:2px;cursor:default;z-index:2}
+@media(max-width:520px){#puzzle{gap:2%;padding:2%}.puzzle-board{width:98%;gap:1.5%}.target{border-width:2px;border-radius:9px}.puzzle-tray{width:98%;gap:1.5%}.puzzle-piece{padding:2px;border-radius:8px}}
+@media(max-height:500px){.stage.puzzle-mode{width:min(46vh,70vw);aspect-ratio:4/3}#puzzle{flex-direction:row;gap:2%;padding:2%}.puzzle-board{width:auto;height:100%;aspect-ratio:4/3;flex:1;margin:auto 0}.puzzle-tray{width:auto;height:100%;aspect-ratio:1/3;max-height:none;grid-auto-flow:row;grid-template-columns:1fr;grid-template-rows:repeat(4,1fr);grid-auto-columns:auto;flex:none;margin:auto 0;overflow-y:auto;overflow-x:hidden;scroll-snap-type:y mandatory}.puzzle-piece{width:100%;height:100%;min-height:0;aspect-ratio:4/3}}
 #celebrate{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#fff9;font-size:70px;z-index:20;pointer-events:none}
 @media(max-width:520px){.home{padding:16px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card{min-height:138px}.paint{padding:8px}.paint-head{gap:5px}.action{padding:9px 10px}.color{width:45px;height:45px}}
 @media(max-height:650px){.home{padding:10px}.home-head{padding:0 0 10px}.home-head h1{font-size:30px}.card{min-height:110px}.card .icon{font-size:48px}.paint{padding:4px 10px}.message{padding:4px}.stage{width:min(74vw,680px);max-height:67vh}.color{width:42px;height:42px}}
@@ -126,7 +129,7 @@ function details(){
 function point(e){var r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
 function dab(e){if(mode!=='paint')return;var p=point(e);ctx.save();path(ctx,shape);ctx.clip();ctx.globalAlpha=.05;ctx.globalCompositeOperation='source-over';ctx.fillStyle=color;ctx.beginPath();ctx.arc(p.x,p.y,55,0,Math.PI*2);ctx.fill();ctx.restore();details();}
 function select(s){
-  shape=s;mode='paint';puzzle.style.display='none';puzzle.innerHTML='';canvas.style.visibility='visible';bottom.style.display='flex';message.textContent='¡Pinta con el dedo!';homeScreen.classList.remove('active');paintScreen.classList.add('active');outline();
+  shape=s;mode='paint';document.getElementById('stage').classList.remove('puzzle-mode');puzzle.style.display='none';puzzle.innerHTML='';canvas.style.visibility='visible';bottom.style.display='flex';message.textContent='¡Pinta con el dedo!';homeScreen.classList.remove('active');paintScreen.classList.add('active');outline();
 }
 function goHome(){drawing=false;mode='paint';paintScreen.classList.remove('active');homeScreen.classList.add('active');}
 canvas.addEventListener('pointerdown',function(e){drawing=true;try{canvas.setPointerCapture(e.pointerId);}catch(_){}dab(e);});
@@ -138,10 +141,13 @@ document.getElementById('reset').addEventListener('click',function(){outline();}
 document.getElementById('homeBtn').addEventListener('click',goHome);
 function startPuzzle(){
   if(mode==='puzzle')return;
-  mode='puzzle';drawing=false;canvas.style.visibility='hidden';bottom.style.display='none';puzzle.style.display='flex';puzzle.innerHTML='';message.textContent='¡Arrastra cada tarjeta a su hueco!';
+  mode='puzzle';drawing=false;document.getElementById('stage').classList.add('puzzle-mode');canvas.style.visibility='hidden';bottom.style.display='none';puzzle.style.display='flex';puzzle.innerHTML='';message.textContent='¡Arrastra cada tarjeta a su hueco!';
   var board=document.createElement('div');board.className='puzzle-board';
   var tray=document.createElement('div');tray.className='puzzle-tray';
   var crop={x:40,y:30,w:720,h:540},pieceW=360,pieceH=270,positions=[[0,0],[1,0],[0,1],[1,1]],order=[2,0,3,1],slots=[];
+  var preview=document.createElement('canvas');preview.width=800;preview.height=600;
+  preview.getContext('2d').drawImage(canvas,crop.x,crop.y,crop.w,crop.h,0,0,800,600);
+  board.style.setProperty('--puzzle-preview','url("'+preview.toDataURL('image/png')+'")');
   for(var i=0;i<4;i++){
     var slot=document.createElement('div');slot.className='target';slot.dataset.index=String(i);board.appendChild(slot);slots.push(slot);
   }
