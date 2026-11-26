@@ -53,12 +53,28 @@ canvas{display:block;width:100%;height:100%;touch-action:none}
 #celebrate{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#fff9;font-size:70px;z-index:20;pointer-events:none}
 @media(max-width:520px){.home{padding:16px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card{min-height:138px}.paint{padding:8px}.paint-head{gap:5px}.action{padding:9px 10px}.bottom{grid-template-columns:repeat(4,45px);grid-template-rows:45px 45px auto;gap:8px}.color{width:45px;height:45px;min-width:45px;flex-basis:45px}}
 @media(max-height:650px){.home{padding:10px}.home-head{padding:0 0 10px}.home-head h1{font-size:30px}.card{min-height:110px}.card .icon{font-size:48px}.paint{padding:4px 10px}.message{padding:4px}.stage{width:min(74vw,680px);max-height:67vh}.color{width:42px;height:42px}}
+
+.match{width:min(100%,760px);margin:auto;padding:12px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.match .paint-head{width:100%}
+.match-target,.match-option{background:white;border-radius:22px;box-shadow:0 4px 0 #e7ddcc;display:grid;place-items:center;aspect-ratio:1;border:3px solid transparent}
+.match-target{width:min(44vw,210px,32vh)}
+.match-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;width:100%;max-width:640px}
+.match-option{width:100%;padding:10%;touch-action:manipulation}
+.match-target svg,.match-option svg{width:82%;height:auto;pointer-events:none}
+.match-option.good{border-color:#74c69d;background:#e5f7e8;transform:scale(1.05)}
+.match-option.retry{animation:wiggle .25s ease}
+@keyframes wiggle{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@media(max-width:520px) and (orientation:portrait){.match-options{grid-template-columns:repeat(2,minmax(0,1fr));max-width:340px}.match-option{max-height:19vh}}
+@media(max-height:500px){.match{gap:4px;padding:4px 12px}.match-options{max-width: min(85vw, 64vh + 200px)}.match-option{max-height:32vh}.match .message{font-size:18px}}
+@media(prefers-reduced-motion:reduce){.match-option.retry{animation:none}}
 </style>
 </head>
 <body>
-<main id="homeScreen" class="screen active">
+<main id="menuScreen" class="screen active"><div class="home"><header class="home-head"><h1>Pequejuegos</h1></header><div class="grid"><button class="card" id="openDraw"><span class="icon">🎨</span><span class="label">Dibujos</span></button><button class="card" id="openShapes"><span class="icon">🔴 ⭐</span><span class="label">Formas</span></button></div></div></main>
+<section id="shapesScreen" class="screen"><div class="match"><header class="paint-head"><button class="action" id="shapesBack" aria-label="Inicio">⌂ Inicio</button><h1>Formas</h1><span></span></header><div id="matchTarget" class="match-target"></div><div id="matchMessage" class="message" aria-live="polite">¿Cuál es igual?</div><div id="matchOptions" class="match-options"></div></div></section>
+<main id="homeScreen" class="screen">
   <div class="home">
-    <header class="home-head"><h1>🎨 ¿Qué quieres pintar?</h1><p>Elige un dibujo para empezar</p></header>
+    <button class="action" id="drawBack">⌂ Inicio</button><header class="home-head"><h1>🎨 ¿Qué quieres pintar?</h1><p>Elige un dibujo para empezar</p></header>
     <div class="grid">
       <button class="card" data-shape="cat"><span class="icon">🐱</span><span class="label">Gato</span></button>
       <button class="card" data-shape="fish"><span class="icon">🐟</span><span class="label">Pez</span></button>
@@ -171,7 +187,7 @@ function goHome(){drawing=false;mode='paint';paintScreen.classList.remove('activ
 canvas.addEventListener('pointerdown',function(e){drawing=true;try{canvas.setPointerCapture(e.pointerId);}catch(_){}dab(e);});
 canvas.addEventListener('pointermove',function(e){if(drawing)dab(e);});
 ['pointerup','pointercancel','lostpointercapture'].forEach(function(x){canvas.addEventListener(x,function(){drawing=false;});});
-document.querySelectorAll('.card').forEach(function(b){b.addEventListener('click',function(){select(b.dataset.shape);});});
+document.querySelectorAll('.card[data-shape]').forEach(function(b){b.addEventListener('click',function(){select(b.dataset.shape);});});
 document.querySelectorAll('[data-color]').forEach(function(b){b.addEventListener('click',function(){color=b.dataset.color;document.querySelectorAll('[data-color]').forEach(function(v){v.classList.remove('selected');});b.classList.add('selected');});});
 document.getElementById('reset').addEventListener('click',function(){outline();});
 document.getElementById('homeBtn').addEventListener('click',goHome);
@@ -205,7 +221,7 @@ function startPuzzle(){
       for(var j=0;j<slots.length;j++){var r=slots[j].getBoundingClientRect();if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom){target=slots[j];break;}}
       if(target&&target.dataset.index===piece.dataset.index){
         target.appendChild(piece);piece.dataset.locked='yes';piece.setAttribute('aria-label','Pieza colocada');solved++;
-        if(solved===4){message.textContent='¡Muy bien! 🎉';document.getElementById('celebrate').style.display='flex';setTimeout(function(){document.getElementById('celebrate').style.display='none';select(shape);},1800);}
+        if(solved===4){message.textContent='¡Muy bien! 🎉';document.getElementById('celebrate').style.display='flex';setTimeout(function(){document.getElementById('celebrate').style.display='none';if(paintScreen.classList.contains('active')&&mode==='puzzle')select(shape);},1800);}
       }
     });
     piece.addEventListener('pointercancel',function(){drag=false;piece.classList.remove('dragging');piece.style.transform='';});
@@ -218,5 +234,26 @@ document.getElementById('done').addEventListener('click',startPuzzle);
 <script>
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}
 </script>
-</body>
+<script>
+(function(){
+var menu=document.getElementById('menuScreen'),draw=document.getElementById('homeScreen'),game=document.getElementById('shapesScreen'),target=document.getElementById('matchTarget'),options=document.getElementById('matchOptions'),msg=document.getElementById('matchMessage');
+var forms=['cuadrado','círculo','estrella','corazón','triángulo','rombo'];
+var palette=Array.from(document.querySelectorAll('[data-color]')).map(function(b){return {hex:b.dataset.color,name:b.getAttribute('aria-label')};});
+var streak=0,level=0,locked=false,timer=null,last='',audio=null;
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),v=a[i];a[i]=a[j];a[j]=v;}return a;}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function svg(f,c){var paths=['<rect x="12" y="12" width="76" height="76" rx="4"/>','<circle cx="50" cy="50" r="40"/>','<path d="M50 4 64 34 96 39 73 62 79 94 50 79 21 94 27 62 4 39 36 34Z"/>','<path d="M50 91 C35 77 5 56 5 32 C5 9 35 4 50 26 C65 4 95 9 95 32 C95 56 65 77 50 91Z"/>','<path d="M50 7 96 90 4 90Z"/>','<path d="M50 4 94 50 50 96 6 50Z"/>'];return '<svg viewBox="0 0 100 100" aria-hidden="true" fill="'+palette[c].hex+'">'+paths[f]+'</svg>';}
+function show(screen){clearTimeout(timer);locked=true;[menu,draw,game].forEach(function(el){el.classList.toggle('active',el===screen);});window.scrollTo(0,0);}
+function chime(){try{var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;if(!audio)audio=new AC();audio.resume();[523.25,659.25,783.99].forEach(function(h,i){var o=audio.createOscillator(),g=audio.createGain(),t=audio.currentTime+i*.09;o.type='sine';o.frequency.value=h;g.gain.setValueAtTime(.055,t);g.gain.exponentialRampToValueAtTime(.001,t+.18);o.connect(g);g.connect(audio.destination);o.start(t);o.stop(t+.19);});}catch(e){}}
+function round(){if(!game.classList.contains('active'))return;locked=false;msg.textContent='¿Cuál es igual?';var f,c;do{f=pick(forms.map(function(_,i){return i;}));c=pick(palette.map(function(_,i){return i;}));}while(f+':'+c===last);last=f+':'+c;
+var fs=shuffle(forms.map(function(_,i){return i;}).filter(function(i){return i!==f;})),cs=shuffle(palette.map(function(_,i){return i;}).filter(function(i){return i!==c;}));
+var answers=[[f,c]];if(level===0){fs.slice(0,3).forEach(function(i){answers.push([i,c]);});}else if(level===1){cs.slice(0,3).forEach(function(i){answers.push([f,i]);});}else{answers.push([f,cs[0]],[fs[0],c],[fs[1],cs[1]]);}
+target.innerHTML=svg(f,c);target.setAttribute('aria-label',forms[f]+' '+palette[c].name);target.setAttribute('role','img');options.innerHTML='';
+shuffle(answers).forEach(function(a){var b=document.createElement('button');b.className='match-option';b.setAttribute('aria-label',forms[a[0]]+' '+palette[a[1]].name);b.innerHTML=svg(a[0],a[1]);b.addEventListener('click',function(){if(locked)return;if(a[0]===f&&a[1]===c){locked=true;b.classList.add('good');msg.textContent='¡Muy bien! ⭐';chime();streak++;if(streak>=5){level=Math.min(2,level+1);streak=0;}timer=setTimeout(round,1000);}else{streak=0;msg.textContent='¡Prueba otra vez!';b.classList.remove('retry');void b.offsetWidth;b.classList.add('retry');}});options.appendChild(b);});}
+document.getElementById('openDraw').onclick=function(){show(draw);};
+document.getElementById('drawBack').onclick=function(){show(menu);};
+document.getElementById('shapesBack').onclick=function(){show(menu);};
+document.getElementById('openShapes').onclick=function(){show(game);level=0;streak=0;round();};
+})();
+</script></body>
 </html>
